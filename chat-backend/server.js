@@ -1,59 +1,28 @@
 const express = require("express");
-require('dotenv').config();
-const mongoose = require("mongoose");
-const cors = require("cors");
-const http = require("http");
-const { Server } = require("socket.io");
-const ChatMessage = require("./models/ChatMessage");
-const connectDB = require("./config/db");
+const { chats } = require("./data/data");
+const dotenv = require("dotenv")
+const colors = require("colors")
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    // change origin to your React dev origin
-    cors: { origin: "http://localhost:3000", methods: ["GET", "POST"] }
-});
+
+dotenv.config();
+
+app.get("/", (req, res) => {
+    res.send("API is running!");
+})
+
+app.get("/api/chat", (req, res) => {
+    res.send(chats);
+})
+
+app.get("/api/chat/:id", (req, res) => {
+    // console.log(req.params.id)
+    const singleChat = chats.find((c) => c._id === req.params.id);
+    res.send(singleChat);
+})
 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+app.listen(PORT, console.log(`Server started on PORT ${PORT}`.yellow.bold));
 
-connectDB();
-
-//Simple route to get saved messages
-app.get("/messages", async (req, res) => {
-    try {
-        const messages = await ChatMessage.find().sort({ createdAt: 1 });
-        res.json(messages);
-    } catch (err) {
-        console.error("GET /messages error: ", err);
-        res.status(500).json({ error: "Failed to fetch messages" });
-    }
-});
-
-// Socket.IO handlers
-io.on("connection", (socket) => {
-    console.log("A user connected: ", socket.id);
-
-    socket.on("sendMessage", async (data) => {
-        try {
-            const { user, message } = data;
-            const chatMessage = new ChatMessage({ user, message });
-            await chatMessage.save();
-            // Emit to everyone (including sender)
-            io.emit("message", chatMessage);
-        } catch (error) {
-            console.error("Error when saving message: ", error);
-        }
-    });
-
-    socket.on("disconnect", (reason) => {
-        console.log("A user disconnected: ", socket.id, reason);
-    });
-});
-
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
-
+console.log("Server restarted!", Date.now());

@@ -1,13 +1,16 @@
 
 import './App.css';
-import ChatRoom from './components/ChatRoom';
+import { Route, Routes } from 'react-router';
+import WelcomePage from './components/WelcomePage';
+import ChatPage from './components/ChatPage';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <ChatRoom />
-      </header>
+      <Routes>
+        <Route path='/' element={<WelcomePage />} />
+        <Route path='/chatpage' element={<ChatPage />} />
+      </Routes>
     </div>
   );
 }
