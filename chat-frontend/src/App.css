@@ -2,6 +2,9 @@
   text-align: center;
   /*min-height: 100vh;
   display: flex;*/
+  background-image: url("https://images.pexels.com/photos/281260/pexels-photo-281260.jpeg?_gl=1*1krkdd5*_ga*ODk3ODQyMTEyLjE3NzY3NjQxMTc.*_ga_8JE65Q40S6*czE3NzY3NjQxMTckbzEkZzEkdDE3NzY3NjQxNjckajEwJGwwJGgw");
+  background-size: cover;
+  background-position: center;
 }
 
 .App-logo {
@@ -40,38 +43,46 @@
 }
 
 h1 {
-    color: #00246b;
+  color: #00246b;
 }
 
 ul {
-    list-style-type: none;
-    padding: 0;
+  list-style-type: none;
+  padding: 0;
 }
 
 li {
-    background-color: #8ab6f9;
-    margin: 5px;
-    padding: 10px;
-    border-radius: 5px;
+  background-color: #8ab6f9;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 input {
-    padding: 10px;
-    margin-right: 10px;
-    border: 1px solid #00246b;
-    border-radius: 5px;
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid #00246b;
+  border-radius: 5px;
 }
 
 button {
-    padding: 10px;
-    background-color: #00246b;
-    color: #cadcfc;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  padding: 10px;
+  background-color: #00246b;
+  color: #cadcfc;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
-    background-color: #8ab6f9;
-    color: #00246b;
+  background-color: #8ab6f9;
+  color: #00246b;
+}
+
+.glass-box {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 0;
+  margin: 13px;
 }
