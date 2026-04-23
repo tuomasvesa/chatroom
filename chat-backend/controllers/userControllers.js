@@ -54,4 +54,18 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { registerUser, authUser };
+// /api/user?search
+const allUsers = asyncHandler(async (req, res) => {
+  const keyword = req.query.search
+    ? {
+        // check if url has smth like /api/user?search=tuomas
+        username: { $regex: req.query.search, $options: "i" }, // compare usernames to esarch param, i means case-sensitive
+      }
+    : {};
+
+  const users = await User.find(keyword).find({ _id: { $ne: req.user._id } }); // latter find excludes current logged in user.
+  // ^ ne means not equal.
+  res.send(users);
+});
+
+module.exports = { registerUser, authUser, allUsers };
