@@ -51,21 +51,32 @@ const accessChat = asyncHandler(async (req, res) => {
 // for getting the specific users' chats. (in this first version everyone sees all the chats)
 const fetchChats = asyncHandler(async (req, res) => {
   try {
-    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+    const chats = await Chat.find()
       .populate("users", "-password")
-      .sort({ updatedAt: -1 })
-      .then(async (results) => {
-        results = await User.populate(results, {
-          path: "latestMessage.sender",
-          select: "username pic",
-        });
+      .sort({ updatedAt: -1 });
 
-        res.status(200).send(results);
-      });
+    res.status(200).json(chats);
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
   }
+  // commented out tutorial code
+  //   try {
+  //     Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+  //       .populate("users", "-password")
+  //       .sort({ updatedAt: -1 })
+  //       .then(async (results) => {
+  //         results = await User.populate(results, {
+  //           path: "latestMessage.sender",
+  //           select: "username pic",
+  //         });
+
+  //         res.status(200).send(results);
+  //       });
+  //   } catch (error) {
+  //     res.status(400);
+  //     throw new Error(error.message);
+  //   }
 });
 
 const createGroupChat = asyncHandler(async (req, res) => {
@@ -83,7 +94,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
   //       .send("More than 2 users are required to form a group chat");
   //   }
 
-  users.push(req.user); // Add the current user to chat
+  users.push(req.user); // Add the current user to chat. Delete this later if all are added anyway?
 
   try {
     const groupChat = await Chat.create({
