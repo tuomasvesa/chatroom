@@ -14,6 +14,15 @@ const PORT = process.env.PORT || 5000;
 dotenv.config();
 connectDB();
 
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
+
 app.use(express.json()); // to accept JSON data
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
