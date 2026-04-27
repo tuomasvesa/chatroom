@@ -14,7 +14,6 @@ const SingleChat = (selectedChatProps) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState();
   const [message, setMessage] = useState();
-  const socketRef = useRef(null);
   const [socketConnected, setSocketConnected] = useState(false);
 
   const { user } = ChatState();
