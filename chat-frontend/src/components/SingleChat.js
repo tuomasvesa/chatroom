@@ -5,6 +5,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { toaster } from "./ui/toaster";
 import ScrollableChat from "./ScrollableChat";
 import { io } from "socket.io-client";
+axios.defaults.baseURL = "http://localhost:5000";
+const ENDPOINT = "http://localhost:5000";
+var socket, selectedChatCompare;
 
 const SingleChat = (selectedChatProps) => {
   const selectedChat = selectedChatProps.props;
@@ -12,9 +15,9 @@ const SingleChat = (selectedChatProps) => {
   const [loading, setLoading] = useState();
   const [message, setMessage] = useState();
   const socketRef = useRef(null);
-  const { user } = ChatState();
-  axios.defaults.baseURL = "http://localhost:5000";
+  const [socketConnected, setSocketConnected] = useState(false);
 
+  const { user } = ChatState();
   const fetchMessages = async () => {
     if (!selectedChat) return;
     try {
@@ -30,7 +33,9 @@ const SingleChat = (selectedChatProps) => {
       );
       setMessages(data);
       setLoading(false);
-      console.log("Messages: ", messages);
+
+      // socket io code: join to the chatroom
+      socket.emit("join chat", selectedChat._id);
     } catch (error) {
       toaster.create({
         title: "Error occurred!",
@@ -44,44 +49,36 @@ const SingleChat = (selectedChatProps) => {
   };
 
   useEffect(() => {
-    fetchMessages();
-    // Socket io code from first prototype
-    socketRef.current = io("http://localhost:5000", {
-      transports: ["websocket", "polling"],
-    });
-    socketRef.current.on("connect", () => {
-      console.log("Connected to socket server: ", socketRef.current.id);
-    });
-    socketRef.current.on("message", (newMessage) => {
-      setMessages((prev) => [...prev, newMessage]);
-    });
-    socketRef.current.on("disconnect", (reason) => {
-      console.log("Socket disconnected: ", reason);
-    });
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off("message");
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connection", () => setSocketConnected(true));
+  }, []);
+
+  useEffect(() => {
+    if (selectedChat) {
+      fetchMessages();
+
+      selectedChatCompare = selectedChat;
+    }
   }, [selectedChat]);
 
+  useEffect(() => {
+    socket.on("message received", (newMessageReceived) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== newMessageReceived.chat._id
+      ) {
+        // give notification if the message belongs to chat that isnt currently viewed (optional)
+      } else {
+        setMessages([...messages, newMessageReceived]);
+      }
+    });
+  });
+
   const sendMessage = async (event) => {
-    // // code from older prototype
-    // if (!user || !message) return;
-    // const payload = { message };
-    // //send via socket
-    // if (socketRef.current && socketRef.current.connected) {
-    //   socketRef.current.emit("sendMessage", payload);
-    // } else {
-    //   console.warn("Socket not connected. Falling back to POST (optional).");
-    // }
-    // setMessage("");
-    console.log("Running sendMessage function");
+    // console.log("Running sendMessage function");
     if (event.key === "Enter" && message) {
       event.preventDefault();
-      console.log("pressed enter and message has content");
       try {
         const config = {
           headers: {
@@ -90,7 +87,7 @@ const SingleChat = (selectedChatProps) => {
           },
         };
 
-        setMessage("");
+        //setMessage("");
         const { data } = await axios.post(
           "/api/message",
           {
@@ -99,8 +96,27 @@ const SingleChat = (selectedChatProps) => {
           },
           config,
         );
-        console.log(data);
+
+        socket.emit("new message", data);
+
         setMessages([...messages, data]);
+        // socket.io code from older prototype
+
+        // const payload = {
+        //   sender: user._id,
+        //   content: data.content,
+        //   chat: selectedChat._id,
+        // };
+        // //send via socket
+        // if (socketRef.current && socketRef.current.connected) {
+        //   socketRef.current.emit("sendMessage", payload);
+        // } else {
+        //   console.warn(
+        //     "Socket not connected. Falling back to POST (optional).",
+        //   );
+        // }
+        setMessage("");
+        //socket.io code ends here
       } catch (error) {
         toaster.create({
           title: "Error occurred!",
@@ -123,20 +139,27 @@ const SingleChat = (selectedChatProps) => {
   return (
     <>
       {selectedChat ? (
-        <>
-          <Text fontSize="xl" fontWeight="bold" color="black">
+        <Box
+          display="flex"
+          flexDirection="column"
+          w="100%"
+          h="100%"
+          bg="#E8E8E8"
+          borderRadius="lg"
+          overflow="hidden"
+        >
+          <Text fontSize="xl" fontWeight="bold" color="black" p={3} pb={2}>
             {selectedChat.chatName}
           </Text>
           <Box
-            d="flex"
-            flexDir="column"
+            display="flex"
+            flexDirection="column"
             justifyContent="flex-end"
+            flex={1}
+            w="100%"
+            overflowY="auto"
             p={3}
             bg="#E8E8E8"
-            w="100%"
-            h="100%"
-            borderRadius="lg"
-            overflowY="hidden"
           >
             {loading ? (
               <Spinner
@@ -147,24 +170,29 @@ const SingleChat = (selectedChatProps) => {
                 margin="auto"
               />
             ) : (
-              <div className="messages">
+              <Box className="messages">
                 <ScrollableChat messages={messages} />
-              </div>
+              </Box>
             )}
-            <form mt={3}>
-              <Input
-                variant="filled"
-                bg="#E8E8E8"
-                placeholder="Enter a message"
-                onChange={typingHandler}
-                onKeyDown={sendMessage}
-                value={message}
-              ></Input>
-            </form>
           </Box>
-        </>
+          <form mt={3}>
+            <Input
+              variant="filled"
+              bg="#E8E8E8"
+              placeholder="Enter a message"
+              onChange={typingHandler}
+              onKeyDown={sendMessage}
+              value={message}
+            ></Input>
+          </form>
+        </Box>
       ) : (
-        <Box d="flex" alignItems="center" justifyContent="center" h="100%">
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          h="100%"
+        >
           <Text>Click on a chat to start chatting!</Text>
         </Box>
       )}

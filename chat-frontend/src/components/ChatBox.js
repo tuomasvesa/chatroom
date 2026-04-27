@@ -7,12 +7,13 @@ const ChatBox = () => {
   const { selectedChat } = ChatState();
   return (
     <Box
-      d={{ base: selectedChat ? "flex" : "none", md: "flex" }}
+      display={{ base: selectedChat ? "flex" : "none", md: "flex" }}
       alignItems="center"
-      flexDir="column"
+      flexDirection="column"
       p={3}
       bg="white"
       w={{ base: "100%", md: "63%" }}
+      h="91.5vh"
       borderRadius="1lg"
       borderWidth={"1px"}
     >

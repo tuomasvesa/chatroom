@@ -2,7 +2,7 @@ import { ChatState } from "../../Context/ChatProvider";
 import React, { useEffect } from "react";
 import { toaster } from "../ui/toaster";
 import axios from "axios";
-import { Box, VStack, Button, Stack } from "@chakra-ui/react";
+import { Box, VStack, Button, Stack, Text } from "@chakra-ui/react";
 
 const ChatList = () => {
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
@@ -32,12 +32,17 @@ const ChatList = () => {
     if (user) {
       fetchChats();
     }
-  }, [user]);
+  }, []);
 
   return (
     <div>
+      <Box p={4}>
+        <Text fontSize="xl" textAlign={"left"} color={"white"}>
+          Chat Topics
+        </Text>
+      </Box>
       <Stack direction={"row"}>
-        <Box w="30%" h="100%" p={4}>
+        <Box minW="fit-content" w="50%" h="100%" p={4}>
           <VStack spacing={2} align="stretch">
             {chats &&
               chats.map((chat) => (
@@ -47,12 +52,12 @@ const ChatList = () => {
                     console.log("setting selectedChat:", chat);
                     setSelectedChat(chat);
                   }}
-                  bg={selectedChat?._id === chat._id ? "blue.500" : "gray.100"}
+                  bg={selectedChat?._id === chat._id ? "green.600" : "gray.100"}
                   color={selectedChat?._id === chat._id ? "white" : "black"}
                   justifyContent="flex-start"
                   h="auto"
                   p={3}
-                  _hover={{ bg: "blue.400", color: "white" }}
+                  _hover={{ bg: "green.500", color: "white" }}
                 >
                   {chat.chatName}
                 </Button>

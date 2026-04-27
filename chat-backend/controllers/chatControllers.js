@@ -86,15 +86,15 @@ const createGroupChat = asyncHandler(async (req, res) => {
   }
 
   // replace this with getting all the users
-  var users = JSON.parse(req.body.users); // users that are invited/added to group
-
+  //var users = JSON.parse(req.body.users); // users that are invited/added to group
+  var users = req.body.users;
   //   if (users.length < 2) {
   //     return res
   //       .status(400)
   //       .send("More than 2 users are required to form a group chat");
   //   }
 
-  users.push(req.user); // Add the current user to chat. Delete this later if all are added anyway?
+  //users.push(req.user); // Add the current user to chat. Delete this later if all are added anyway?
 
   try {
     const groupChat = await Chat.create({

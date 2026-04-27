@@ -1,5 +1,5 @@
 import { ChatState } from "../Context/ChatProvider";
-import { Box, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import React from "react";
 import * as ScrollableFeedModule from "react-scrollable-feed";
 

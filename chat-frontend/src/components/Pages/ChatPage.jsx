@@ -32,18 +32,13 @@ const ChatPage = () => {
         </Text> */}
         <Button onClick={logoutHandler}>Log Out</Button>
       </Box>
-      <Stack direction={"row"}>
-        <Box
-          d="flex"
-          justifyContent="space-between"
-          w="100%"
-          h="91.5vh"
-          p="10px"
-        >
+      <Stack direction={"row"} h="91.5vh" spacing={0}>
+        <Box w="30%" h="100%" overflowY="auto">
           <ChatList />
-          {/* {user && <ChatBox />*/}
         </Box>
-        <ChatBox />
+        <Box flex={1} h="100%">
+          <ChatBox />
+        </Box>
       </Stack>
     </div>
   );

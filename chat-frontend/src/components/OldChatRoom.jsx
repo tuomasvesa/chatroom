@@ -10,7 +10,7 @@ const ChatRoom = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await fetch("http://localhost:5000/messages");
+        const res = await fetch("/messages");
         const data = await res.json();
         setMessages(data);
       } catch (err) {
@@ -19,7 +19,7 @@ const ChatRoom = () => {
     };
     fetchMessages();
 
-    socketRef.current = io("http://localhost:5000", {
+    socketRef.current = io("/", {
       transports: ["websocket", "polling"],
     });
 
