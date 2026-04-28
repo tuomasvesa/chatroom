@@ -17,7 +17,6 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-// testing if the old servers code works here
 const server = http.createServer(app);
 const io = new Server(server, {
   // React dev origin
@@ -42,10 +41,10 @@ app.get("/", (req, res) => {
   res.send("API is running!");
 });
 
-// More old server code
 // Socket.IO handlers
 io.on("connection", (socket) => {
   console.log("A user connected: ", socket.id);
+
   socket.on("setup", (userData) => {
     socket.join(userData._id);
     socket.emit("connected");
@@ -53,7 +52,7 @@ io.on("connection", (socket) => {
 
   socket.on("join chat", (room) => {
     socket.join(room); // this should join socket for users that are in the same chatroom
-    console.log("User joined in Room ", room);
+    console.log("User joined Room ", room);
   });
 
   socket.on("new message", async (newMessageReceived) => {
@@ -61,17 +60,8 @@ io.on("connection", (socket) => {
 
     chat.users.forEach((user) => {
       if (user._id == newMessageReceived.sender._id) return;
-      socket.in(user._id).emit("message received", newMessageReceived);
+      socket.in(user._id).emit("message recieved", newMessageReceived);
     });
-    // try {
-    //   const { sender, content, chat } = data;
-    //   const chatMessage = new Message({ sender, content, chat });
-    //   await chatMessage.save();
-    //   // Emit to everyone (including sender)
-    //   io.emit("message", chatMessage);
-    // } catch (error) {
-    //   console.error("Error when saving message: ", error);
-    // }
   });
 
   socket.on("disconnect", (reason) => {

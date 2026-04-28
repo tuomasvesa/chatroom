@@ -78,27 +78,23 @@ const createGroupChat = asyncHandler(async (req, res) => {
     return res.status(400).send({ message: "Please give the chat a name" });
   }
 
-  // replace this with getting all the users
+  
   //var users = JSON.parse(req.body.users); // users that are invited/added to group
-  var users = req.body.users;
-  //   if (users.length < 2) {
-  //     return res
-  //       .status(400)
-  //       .send("More than 2 users are required to form a group chat");
-  //   }
-
-  //users.push(req.user); // Add the current user to chat. Delete this later if all are added anyway?
-
   try {
+    // get all users from DB
+    const allUsers = await User.find({}, "_id");
+    const users = allUsers.map((user) => user._id);
+
     const groupChat = await Chat.create({
       chatName: req.body.chatName,
       users: users,
     });
 
+    // populate users with usernames (otherwise its just ids)
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id }).populate(
       "users",
-      "-password",
-    ); //.populate("groupAdmin", "-password");
+      "-password"
+    );
 
     res.status(200).json(fullGroupChat);
   } catch (error) {

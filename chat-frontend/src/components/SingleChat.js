@@ -1,7 +1,7 @@
 import { ChatState } from "../Context/ChatProvider";
 import { Box, Input, Spinner, Text } from "@chakra-ui/react";
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toaster } from "./ui/toaster";
 import ScrollableChat from "./ScrollableChat";
 import { io } from "socket.io-client";
@@ -34,7 +34,9 @@ const SingleChat = (selectedChatProps) => {
       setLoading(false);
 
       // socket io code: join to the chatroom
-      socket.emit("join chat", selectedChat._id);
+      if (socketConnected) {
+        socket.emit("join chat", selectedChat._id);
+      }
     } catch (error) {
       toaster.create({
         title: "Error occurred!",
@@ -48,26 +50,32 @@ const SingleChat = (selectedChatProps) => {
   };
 
   useEffect(() => {
+    if (!user) return;
+
     socket = io(ENDPOINT);
     socket.emit("setup", user);
-    socket.on("connection", () => setSocketConnected(true));
-  }, []);
+    socket.on("connected", () => setSocketConnected(true));
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user]);
 
   useEffect(() => {
     if (selectedChat) {
       fetchMessages();
-
       selectedChatCompare = selectedChat;
     }
   }, [selectedChat]);
 
   useEffect(() => {
-    socket.on("message received", (newMessageReceived) => {
+    if (!socket) return;
+    socket.on("message recieved", (newMessageReceived) => {
       if (
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessageReceived.chat._id
       ) {
-        // give notification if the message belongs to chat that isnt currently viewed (optional)
+        // here would be notification code
       } else {
         setMessages([...messages, newMessageReceived]);
       }
@@ -99,21 +107,7 @@ const SingleChat = (selectedChatProps) => {
         socket.emit("new message", data);
 
         setMessages([...messages, data]);
-        // socket.io code from older prototype
 
-        // const payload = {
-        //   sender: user._id,
-        //   content: data.content,
-        //   chat: selectedChat._id,
-        // };
-        // //send via socket
-        // if (socketRef.current && socketRef.current.connected) {
-        //   socketRef.current.emit("sendMessage", payload);
-        // } else {
-        //   console.warn(
-        //     "Socket not connected. Falling back to POST (optional).",
-        //   );
-        // }
         setMessage("");
         //socket.io code ends here
       } catch (error) {
